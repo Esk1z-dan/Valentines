@@ -7,14 +7,12 @@
 
   <style>
     :root{
-      /* Emerald luxury palette */
       --bg1:#0e5a3b;
       --bg2:#062d1f;
       --txt:#eafff5;
       --muted:#b8f2d6;
 
       --card: rgba(255,255,255,0.07);
-      --card-border: rgba(255,255,255,0.12);
 
       --accent:#1f9d63;
       --accent2:#0e5a3b;
@@ -41,15 +39,22 @@
       color:var(--txt);
     }
 
+    /* FIX hairline lines (top/bottom/left/right) */
     .card{
       width:min(920px, 92vw);
       background:var(--card);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+
       border:none;
       border-radius:24px;
       padding:20px;
       box-shadow: 0 22px 70px var(--shadow);
+
+      overflow:hidden;                 /* important */
+      background-clip: padding-box;    /* important */
+      transform: translateZ(0);        /* important */
+      outline: none;
     }
 
     h1{
@@ -70,7 +75,14 @@
       overflow:hidden;
       height:min(520px, 58vh);
       background: rgba(0,0,0,0.18);
-      border:none;
+
+      border:0 !important;
+      outline:0 !important;
+      box-shadow:none !important;
+
+      background-clip: padding-box;   /* important */
+      transform: translateZ(0);       /* important */
+      -webkit-mask-image: -webkit-radial-gradient(white, black); /* Safari fix */
     }
 
     .slide{
@@ -79,9 +91,14 @@
       transition: opacity .6s ease, transform .6s ease;
       display:flex; align-items:center; justify-content:center;
       background: transparent;
+
+      border:0 !important;
+      outline:0 !important;
+      box-shadow:none !important;
+      transform: translateZ(0); /* important */
     }
 
-    .slide.active{ opacity:1; transform:scale(1) }
+    .slide.active{ opacity:1; transform:scale(1) translateZ(0) }
 
     .slide img{
       width:100%;
@@ -89,26 +106,38 @@
       object-fit:cover;
       display:block;
       filter: contrast(1.03) saturate(1.05);
+
+      border:0 !important;
+      outline:0 !important;
+      box-shadow:none !important;
+      transform: translateZ(0);
     }
 
     /* Bottom bar: caption + buttons */
     .caption{
-      outline:none;
-      box-shadow:none;
       position:absolute;
       left:14px; right:14px; bottom:12px;
+
       background: rgba(0,0,0,.28);
-      border:none;
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+
       border-radius:14px;
       padding:10px 12px;
       font-size:14px;
+
       display:flex;
       gap:10px;
       align-items:center;
       justify-content:space-between;
       color: var(--txt);
+
+      transform: translateZ(0);
+      background-clip: padding-box;
     }
 
     #capText{
@@ -168,15 +197,19 @@
     }
 
     .note{
-      outline:none;
-      box-shadow:none;
       background: rgba(0,0,0,.22);
-      border:none;
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+
       border-radius:14px;
       padding:10px 12px;
       flex:1;
       min-width:240px;
       color: var(--txt);
+
+      transform: translateZ(0);
+      background-clip: padding-box;
     }
 
     .small{ opacity:.8; color: var(--muted); font-size:12px }
@@ -192,12 +225,13 @@
       animation: floatUp 6s linear forwards;
       filter: drop-shadow(0 0 12px rgba(31,157,99,.65));
       pointer-events:none;
+      transform: translateZ(0);
     }
 
     @keyframes floatUp{
-      from { transform: translateY(20px); opacity:0 }
-      10% { opacity:.9 }
-      to   { transform: translateY(-110vh); opacity:0 }
+      from { transform: translateY(20px) translateZ(0); opacity:0 }
+      10%  { opacity:.9 }
+      to   { transform: translateY(-110vh) translateZ(0); opacity:0 }
     }
   </style>
 </head>
@@ -208,7 +242,6 @@
     <p class="sub">Нажимай “Дальше” или просто жми пробел 🙂</p>
 
     <div class="slider" id="slider">
-      <!-- bottom bar -->
       <div class="caption">
         <div id="capText"></div>
         <div class="btns">
@@ -227,13 +260,11 @@
     </div>
   </div>
 
-  <!-- (необязательно) музыка: положи рядом mp3 и назови music.mp3 -->
   <audio id="music" loop>
     <source src="music.mp3" type="audio/mpeg">
   </audio>
 
   <script>
-    // Фотки и подписи (подписи показываются ВНИЗУ рядом с кнопками)
     const slides = [
       { src: "photos/1.jpg", cap: "Наша первая фотка 💚" },
       { src: "photos/2.jpg", cap: "Тут я самый счастливый ✨" },
@@ -245,16 +276,16 @@
     const capText = document.getElementById("capText");
     let index = 0;
 
-    // Слайды вставляем ПЕРЕД caption, чтобы caption всегда был сверху по z-index
     slides.forEach((s, i) => {
       const d = document.createElement("div");
       d.className = "slide" + (i === 0 ? " active" : "");
 
       const img = document.createElement("img");
       img.src = s.src;
-      img.alt = ""; // важно: чтобы при ошибке загрузки не появлялся текст сверху
-      d.appendChild(img);
+      img.alt = "";
+      img.draggable = false;
 
+      d.appendChild(img);
       slider.insertBefore(d, slider.firstChild);
     });
 
@@ -275,15 +306,12 @@
       if (e.code === "ArrowLeft") show(index - 1);
     });
 
-    // Сердечки (больше)
     function spawnHeart(){
       const h = document.createElement("div");
       h.className = "heart";
 
-      // размеры побольше + немного рандома
-      const size = 22 + Math.random() * 40; 
+      const size = 22 + Math.random() * 40;
       h.style.width = h.style.height = size + "px";
-
       h.style.left = (Math.random() * 100) + "vw";
       h.style.bottom = "-24px";
       h.style.opacity = 0.45 + Math.random() * 0.5;
@@ -294,7 +322,6 @@
     }
     setInterval(spawnHeart, 420);
 
-    // музыка
     const music = document.getElementById("music");
     const musicBtn = document.getElementById("musicBtn");
     musicBtn.onclick = async () => {
