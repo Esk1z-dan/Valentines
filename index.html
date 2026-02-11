@@ -200,11 +200,10 @@
 <body>
   <div class="card">
     <h1>С днем святого Валентина любовь ❤️</h1>
-    <p class="sub">Нажимай “Дальше” или просто жми пробел</p>
+    <p class="sub">Нажимай “Дальше” или просто жми пробел 🙂</p>
 
     <div class="slider" id="slider">
       <div class="caption">
-        <div id="capText" style="display:none;"></div>
         <div class="btns">
           <button class="secondary" id="prev">Назад</button>
           <button id="next">Дальше</button>
@@ -237,7 +236,6 @@
 
     // 2) Рендер слайдов
     const slider = document.getElementById("slider");
-    const capText = document.getElementById("capText");
     let index = 0;
 
     slides.forEach((s, i) => {
@@ -255,7 +253,6 @@
     function show(i){
       index = (i + slides.length) % slides.length;
       nodes.forEach((n, k) => n.classList.toggle("active", k === index));
-      capText.textContent = slides[index].cap || "";
     }
     show(0);
 
