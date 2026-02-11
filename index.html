@@ -46,7 +46,7 @@
       background:var(--card);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      border:1px solid var(--card-border);
+      border:none;
       border-radius:24px;
       padding:20px;
       box-shadow: 0 22px 70px var(--shadow);
@@ -70,7 +70,7 @@
       overflow:hidden;
       height:min(520px, 58vh);
       background: rgba(0,0,0,0.18);
-      border: 1px solid rgba(255,255,255,0.08);
+      border:none;
     }
 
     .slide{
@@ -277,7 +277,7 @@
       h.className = "heart";
 
       // размеры побольше + немного рандома
-      const size = 22 + Math.random() * 22; // 22..44px
+      const size = 22 + Math.random() * 40; 
       h.style.width = h.style.height = size + "px";
 
       h.style.left = (Math.random() * 100) + "vw";
