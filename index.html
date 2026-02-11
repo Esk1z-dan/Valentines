@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>💘 Валентинка</title>
+  <title>💚 Валентинка</title>
 
   <style>
     :root{
@@ -15,9 +15,6 @@
 
       --card: rgba(255,255,255,0.07);
       --card-border: rgba(255,255,255,0.12);
-
-      --panel: rgba(255,255,255,0.10);
-      --panel-border: rgba(255,255,255,0.14);
 
       --accent:#1f9d63;
       --accent2:#0e5a3b;
@@ -35,11 +32,11 @@
       align-items:center;
       justify-content:center;
 
-      /* Emerald luxury background (no pink) */
       background:
         radial-gradient(1200px 800px at 20% 10%, rgba(31,157,99,0.35), transparent 60%),
         radial-gradient(1200px 800px at 80% 90%, rgba(14,90,59,0.55), transparent 60%),
         linear-gradient(135deg, #02150e, #0a3d2a);
+
       overflow:hidden;
       color:var(--txt);
     }
@@ -94,6 +91,7 @@
       filter: contrast(1.03) saturate(1.05);
     }
 
+    /* Bottom bar: caption + buttons */
     .caption{
       position:absolute;
       left:14px; right:14px; bottom:12px;
@@ -111,9 +109,17 @@
       color: var(--txt);
     }
 
-    #capText{ color: var(--muted) }
+    #capText{
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+      padding-right: 10px;
+    }
 
-    .btns{ display:flex; gap:10px }
+    .btns{ display:flex; gap:10px; flex-shrink:0 }
 
     button{
       border:0;
@@ -171,39 +177,36 @@
 
     .small{ opacity:.8; color: var(--muted); font-size:12px }
 
-    /* Floating emerald hearts */
+    /* Floating hearts (bigger) */
     .heart{
       position:absolute;
-      width:18px;
-      height:18px;
-      background:#1f9d63;
+      width:28px;
+      height:28px;
+      background: var(--accent);
       opacity:.9;
-
       clip-path: path("M9 16s-7-4.5-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.5-7 9-7 9z");
-
       animation: floatUp 6s linear forwards;
-      filter: drop-shadow(0 0 10px rgba(31,157,99,.6));
+      filter: drop-shadow(0 0 12px rgba(31,157,99,.65));
       pointer-events:none;
     }
 
-    .heart:before{ left:-7px; top:0 }
-    .heart:after { left:0; top:-7px }
-
     @keyframes floatUp{
-      from { transform: translateY(20px) rotate(45deg); opacity:0 }
+      from { transform: translateY(20px); opacity:0 }
       10% { opacity:.9 }
-      to   { transform: translateY(-110vh) rotate(45deg); opacity:0 }
+      to   { transform: translateY(-110vh); opacity:0 }
     }
   </style>
 </head>
 
 <body>
   <div class="card">
-    <h1>С днем святого Валентина любовь ❤️</h1>
+    <h1>С днём святого Валентина, любовь ❤️</h1>
     <p class="sub">Нажимай “Дальше” или просто жми пробел 🙂</p>
 
     <div class="slider" id="slider">
+      <!-- bottom bar -->
       <div class="caption">
+        <div id="capText"></div>
         <div class="btns">
           <button class="secondary" id="prev">Назад</button>
           <button id="next">Дальше</button>
@@ -226,7 +229,7 @@
   </audio>
 
   <script>
-    // 1) Тут меняешь список фоток и подписи
+    // Фотки и подписи (подписи показываются ВНИЗУ рядом с кнопками)
     const slides = [
       { src: "photos/1.jpg", cap: "Наша первая фотка 💚" },
       { src: "photos/2.jpg", cap: "Тут я самый счастливый ✨" },
@@ -234,18 +237,21 @@
       { src: "photos/4.jpg", cap: "Я выбираю тебя. Всегда. 💎" },
     ];
 
-    // 2) Рендер слайдов
     const slider = document.getElementById("slider");
+    const capText = document.getElementById("capText");
     let index = 0;
 
+    // Слайды вставляем ПЕРЕД caption, чтобы caption всегда был сверху по z-index
     slides.forEach((s, i) => {
       const d = document.createElement("div");
       d.className = "slide" + (i === 0 ? " active" : "");
+
       const img = document.createElement("img");
       img.src = s.src;
-      img.alt = s.cap || "photo";
+      img.alt = ""; // важно: чтобы при ошибке загрузки не появлялся текст сверху
       d.appendChild(img);
-      slider.insertBefore(d, slider.firstChild); // чтобы caption был сверху
+
+      slider.insertBefore(d, slider.firstChild);
     });
 
     const nodes = Array.from(document.querySelectorAll(".slide"));
@@ -253,32 +259,36 @@
     function show(i){
       index = (i + slides.length) % slides.length;
       nodes.forEach((n, k) => n.classList.toggle("active", k === index));
+      capText.textContent = slides[index].cap || "";
     }
     show(0);
 
     document.getElementById("next").onclick = () => show(index + 1);
     document.getElementById("prev").onclick = () => show(index - 1);
 
-    // пробел/стрелки
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.code === "ArrowRight") show(index + 1);
       if (e.code === "ArrowLeft") show(index - 1);
     });
 
-    // сердечки
+    // Сердечки (больше)
     function spawnHeart(){
       const h = document.createElement("div");
       h.className = "heart";
-      const size = 10 + Math.random() * 18;
+
+      // размеры побольше + немного рандома
+      const size = 22 + Math.random() * 22; // 22..44px
       h.style.width = h.style.height = size + "px";
+
       h.style.left = (Math.random() * 100) + "vw";
-      h.style.bottom = "-20px";
+      h.style.bottom = "-24px";
       h.style.opacity = 0.45 + Math.random() * 0.5;
-      h.style.animationDuration = (4 + Math.random() * 4) + "s";
+      h.style.animationDuration = (4.5 + Math.random() * 4) + "s";
+
       document.body.appendChild(h);
-      setTimeout(() => h.remove(), 9000);
+      setTimeout(() => h.remove(), 10000);
     }
-    setInterval(spawnHeart, 450);
+    setInterval(spawnHeart, 420);
 
     // музыка
     const music = document.getElementById("music");
