@@ -304,6 +304,37 @@
       .gateBtn{ width:100%; }
     }
     /* ===================================== */
+
+    /* ===== NEW: COUNTER styles ===== */
+    .counterBox{
+      width:100%;
+      background: rgba(0,0,0,.22);
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+      border-radius:14px;
+      padding:10px 12px;
+      color: var(--txt);
+      transform: translateZ(0);
+      background-clip: padding-box;
+    }
+    .counterTitle{
+      color: var(--muted);
+      opacity:.95;
+      font-size:12px;
+      margin-bottom:4px;
+      letter-spacing:.1px;
+    }
+    #loveCounter{
+      font-weight:800;
+      color: var(--accent-soft);
+      font-size:15px;
+      line-height:1.25;
+    }
+    @media (max-width: 480px){
+      .counterBox{ min-width: 100%; }
+    }
+    /* ================================ */
   </style>
 </head>
 
@@ -334,6 +365,14 @@
       </div>
 
       <div class="footer">
+
+        <!-- ===== NEW: COUNTER (above note) ===== -->
+        <div class="counterBox" id="counterBox">
+          <div class="counterTitle">Ты делаешь меня счастливым уже:</div>
+          <div id="loveCounter">...</div>
+        </div>
+        <!-- ==================================== -->
+
         <div class="note" id="note">
           Я люблю тебя. Спасибо за нас. 💚
         </div>
@@ -425,6 +464,9 @@
         gateErr.textContent = "";
         gate.style.display = "none";
         app.hidden = false;
+
+        // NEW: запускаем счётчик только после входа
+        startLoveCounter();
       } else {
         gateErr.textContent = "Неправильно 😄 Попробуй ещё раз";
         dateInput.focus();
@@ -447,6 +489,35 @@
 
     setTimeout(() => { dateInput.focus(); }, 150);
     // ==========================
+
+    // NEW: LIVE COUNTER
+    let loveCounterTimer = null;
+    function pad2(n){ return String(n).padStart(2, "0"); }
+
+    function startLoveCounter(){
+      const el = document.getElementById("loveCounter");
+      if (!el) return;
+
+      const startDate = new Date(2024, 6, 12, 0, 0, 0); // 12 July 2024
+
+      function tick(){
+        const now = new Date();
+        let diff = now - startDate;
+        if (diff < 0) diff = 0;
+
+        const sec = Math.floor(diff / 1000);
+        const days = Math.floor(sec / 86400);
+        const hours = Math.floor((sec % 86400) / 3600);
+        const mins = Math.floor((sec % 3600) / 60);
+        const secs = sec % 60;
+
+        el.textContent = `${days} дней ${pad2(hours)}ч ${pad2(mins)}м ${pad2(secs)}с`;
+      }
+
+      tick();
+      if (loveCounterTimer) clearInterval(loveCounterTimer);
+      loveCounterTimer = setInterval(tick, 1000);
+    }
 
     // Клавиатура (на компе)
     window.addEventListener("keydown", (e) => {
