@@ -113,6 +113,7 @@
       height:100%;
       object-fit:cover;
       display:block;
+      transform-origin: center;
       filter: contrast(1.03) saturate(1.05);
       border:0 !important;
       outline:0 !important;
@@ -367,14 +368,14 @@
 
   <script>
     const slides = [
-      { src: "photos/8.jpg", cap: "Наша первая фотка" },
-      { src: "photos/7.jpg", cap: "А тут я в тебя влюбился" },
-      { src: "photos/6.jpg", cap: "Сдесь мы готовились праздновать наш первый новый год" },
-      { src: "photos/5.jpg", cap: "Тут ты чумазая и очень милая" },
-      { src: "photos/4.jpg", cap: "Здесь я тебе сказал что профессионал на коньках" },
-      { src: "photos/3.jpg", cap: "А здесь мы типа крутые" },
-      { src: "photos/2.jpg", cap: "Тут мы я чквствовал себя очень счастливым" },
-      { src: "photos/1.jpg", cap: "А здесь мы злимся чутка друг на друга" },
+      { src: "photos/8.jpg", cap: "Наша первая фотка", pos: "50% 35%", zoom: 1.15 },
+      { src: "photos/7.jpg", cap: "А тут я в тебя влюбился", pos: "50% 30%", zoom: 1.10 },
+      { src: "photos/6.jpg", cap: "Сдесь мы готовились праздновать наш первый новый год", pos: "55% 25%", zoom: 1.00 },
+      { src: "photos/5.jpg", cap: "Тут ты чумазая и очень милая", pos: "50% 40%", zoom: 1.20 },
+      { src: "photos/4.jpg", cap: "Здесь я тебе сказал что профессионал на коньках", pos: "50% 35%", zoom: 1.10 },
+      { src: "photos/3.jpg", cap: "А здесь мы типа крутые", pos: "50% 30%", zoom: 1.05 },
+      { src: "photos/2.jpg", cap: "Тут мы я чувствовал себя очень счастливым", pos: "50% 35%", zoom: 1.10 },
+      { src: "photos/1.jpg", cap: "А здесь мы злимся чутка друг на друга", pos: "50% 35%", zoom: 1.15 },
     ];
 
     const slider = document.getElementById("slider");
