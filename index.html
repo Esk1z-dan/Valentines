@@ -229,23 +229,116 @@
       .note{ min-width: 100%; }
       button{ width: 100%; padding:12px 14px; }
     }
+
+    /* ====== START GATE (дата-пароль) ====== */
+    .gate{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:9999;
+
+      /* положи картинку сердечек рядом с index.html как bg.png */
+      background: url("bg.png") center/cover no-repeat fixed;
+    }
+    .gate::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.55);
+    }
+    .gateCard{
+      position:relative;
+      width:min(520px, 92vw);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius:20px;
+      padding:18px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
+    }
+    .gateTitle{
+      margin:0 0 8px;
+      font-size:22px;
+    }
+    .gateHint{
+      margin:0 0 14px;
+      color: var(--muted);
+      opacity:.95;
+    }
+    .gateRow{
+      display:flex;
+      gap:10px;
+    }
+    .gateInput{
+      flex:1;
+      border:1px solid rgba(126,214,163,0.35);
+      background: rgba(255,255,255,0.06);
+      color: var(--txt);
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:16px;
+      outline:none;
+    }
+    .gateBtn{
+      border-radius:12px;
+      padding:12px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#eafff5;
+      font-weight:700;
+      border:0;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .gateErr{
+      margin-top:10px;
+      color:#ffd6d6;
+      min-height: 18px;
+      font-size:14px;
+    }
+    @media (max-width: 480px){
+      .gateCard{ padding:16px; border-radius:18px; }
+      .gateRow{ flex-direction:column; }
+      .gateBtn{ width:100%; }
+    }
+    /* ===================================== */
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h1>С днём святого Валентина, любовь ❤️</h1>
-    <div class="slider" id="slider">
-      <div class="caption">
-        <div id="capText"></div>
-      </div>
-    </div>
+  <!-- экран-проверка -->
+  <div class="gate" id="gate">
+    <div class="gateCard">
+      <h2 class="gateTitle">Маленькая проверка 💚</h2>
+      <p class="gateHint">Напиши дату начала наших отношений в формате <b>12/07/2024</b> 🙂</p>
 
-    <div class="footer">
-      <div class="note" id="note">
-        Я люблю тебя. Спасибо за нас. 💚
+      <div class="gateRow">
+        <input class="gateInput" id="dateInput" inputmode="numeric" placeholder="12/07/2024" autocomplete="off" />
+        <button class="gateBtn" id="goBtn">Открыть</button>
       </div>
-      <button id="musicBtn">🎵 Вкл/выкл музыку</button>
+
+      <div class="gateErr" id="gateErr"></div>
+    </div>
+  </div>
+
+  <!-- основная валентинка -->
+  <div id="app" hidden>
+    <div class="card">
+      <h1>С днём святого Валентина, любовь ❤️</h1>
+      <div class="slider" id="slider">
+        <div class="caption">
+          <div id="capText"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="note" id="note">
+          Я люблю тебя. Спасибо за нас. 💚
+        </div>
+        <button id="musicBtn">🎵 Вкл/выкл музыку</button>
+      </div>
     </div>
   </div>
 
@@ -291,31 +384,110 @@
     }
     show(0);
 
+    // ====== GATE (дата) ======
+    const gate = document.getElementById("gate");
+    const app = document.getElementById("app");
+    const dateInput = document.getElementById("dateInput");
+    const goBtn = document.getElementById("goBtn");
+    const gateErr = document.getElementById("gateErr");
+
+    const RIGHT_DATE_DIGITS = "12072024"; // ddmmyyyy
+
+    function onlyDigits(s){ return (s || "").replace(/\D/g, ""); }
+
+    function normalizeToDigitsDate(input){
+      const d = onlyDigits(input);
+
+      if (d.length === 8) return d;
+
+      // 12/7/2024 -> 1272024  => 12072024
+      if (d.length === 7) {
+        const dd = d.slice(0,2);
+        const m  = d.slice(2,3);
+        const yyyy = d.slice(3);
+        return dd + "0" + m + yyyy;
+      }
+
+      // 1/7/2024 -> 172024 => 01072024
+      if (d.length === 6) {
+        const day = d.slice(0,1);
+        const mon = d.slice(1,2);
+        const yyyy = d.slice(2);
+        return "0" + day + "0" + mon + yyyy;
+      }
+
+      return d;
+    }
+
+    function tryEnter(){
+      const digits = normalizeToDigitsDate(dateInput.value);
+      if (digits === RIGHT_DATE_DIGITS) {
+        gateErr.textContent = "";
+        gate.style.display = "none";
+        app.hidden = false;
+      } else {
+        gateErr.textContent = "Неправильно 😄 Попробуй ещё раз";
+        dateInput.focus();
+        dateInput.select();
+      }
+    }
+
+    goBtn.addEventListener("click", tryEnter);
+    dateInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") tryEnter();
+    });
+
+    // мягкий ввод: автоматически ставим /
+    dateInput.addEventListener("input", () => {
+      let v = onlyDigits(dateInput.value).slice(0, 8);
+      if (v.length >= 5) v = v.slice(0,2) + "/" + v.slice(2,4) + "/" + v.slice(4);
+      else if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2);
+      dateInput.value = v;
+    });
+
+    setTimeout(() => { dateInput.focus(); }, 150);
+    // ==========================
+
     // Клавиатура (на компе)
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.code === "ArrowRight") show(index + 1);
       if (e.code === "ArrowLeft") show(index - 1);
     });
 
-    // ===== SWIPE (iPhone / Android) =====
+    // ===== SWIPE (iPhone / Android) — фикс под Safari =====
     let startX = 0;
     let startY = 0;
-    let tracking = false;
+    let active = false;
+    let moved = false;
 
-    const SWIPE_X_THRESHOLD = 45;   // сколько пикселей по X нужно пройти
-    const SWIPE_Y_BLOCK = 60;       // если сильно уехали по Y — считаем что это скролл
+    const SWIPE_X_THRESHOLD = 35;
+    const SWIPE_Y_BLOCK = 70;
 
     slider.addEventListener("touchstart", (e) => {
       if (!e.touches || e.touches.length !== 1) return;
       const t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
-      tracking = true;
+      active = true;
+      moved = false;
     }, { passive: true });
 
+    slider.addEventListener("touchmove", (e) => {
+      if (!active || !e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      // если жест горизонтальный — просим Safari не превращать его в скролл
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        moved = true;
+        e.preventDefault();
+      }
+    }, { passive: false });
+
     slider.addEventListener("touchend", (e) => {
-      if (!tracking) return;
-      tracking = false;
+      if (!active) return;
+      active = false;
 
       const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
       if (!t) return;
@@ -323,11 +495,11 @@
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
 
-      // если это больше похоже на вертикальный скролл — игнор
       if (Math.abs(dy) > SWIPE_Y_BLOCK && Math.abs(dy) > Math.abs(dx)) return;
+      if (!moved && Math.abs(dx) < SWIPE_X_THRESHOLD) return;
 
-      if (dx <= -SWIPE_X_THRESHOLD) show(index + 1); // свайп влево
-      else if (dx >= SWIPE_X_THRESHOLD) show(index - 1); // свайп вправо
+      if (dx <= -SWIPE_X_THRESHOLD) show(index + 1);      // влево = вперед
+      else if (dx >= SWIPE_X_THRESHOLD) show(index - 1);  // вправо = назад
     }, { passive: true });
 
     // Сердечки
