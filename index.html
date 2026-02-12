@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <!-- iPhone friendly -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>💚 Валентинка</title>
 
   <style>
@@ -22,7 +21,6 @@
     }
 
     *{ box-sizing:border-box }
-    html, body { height:100%; }
 
     body{
       margin:0;
@@ -39,10 +37,8 @@
 
       overflow:hidden;
       color:var(--txt);
-      -webkit-font-smoothing: antialiased;
     }
 
-    /* FIX hairline lines (top/bottom/left/right) */
     .card{
       width:min(920px, 92vw);
       background:var(--card);
@@ -76,26 +72,26 @@
       position:relative;
       border-radius:18px;
       overflow:hidden;
-
-      /* desktop fallback */
       height:min(520px, 58vh);
-
       background: rgba(0,0,0,0.18);
+
       border:0 !important;
       outline:0 !important;
       box-shadow:none !important;
 
       background-clip: padding-box;
       transform: translateZ(0);
-
-      /* Safari rounding/antialias fix */
       -webkit-mask-image: -webkit-radial-gradient(white, black);
+
+      /* чтобы на iPhone свайп был приятный */
+      touch-action: pan-y; /* разрешаем вертикальный скролл страницы, но ловим горизонтальный свайп */
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .slide{
       position:absolute; inset:0;
-      opacity:0;
-      transform:scale(1.02);
+      opacity:0; transform:scale(1.02);
       transition: opacity .6s ease, transform .6s ease;
       display:flex; align-items:center; justify-content:center;
       background: transparent;
@@ -103,31 +99,34 @@
       border:0 !important;
       outline:0 !important;
       box-shadow:none !important;
-      will-change: transform, opacity;
+      transform: translateZ(0);
     }
 
-    .slide.active{ opacity:1; transform:scale(1) }
+    .slide.active{ opacity:1; transform:scale(1) translateZ(0) }
 
     .slide img{
       width:100%;
       height:100%;
       object-fit:cover;
       display:block;
-      transform-origin: center;
       filter: contrast(1.03) saturate(1.05);
+
       border:0 !important;
       outline:0 !important;
       box-shadow:none !important;
-      -webkit-user-drag:none;
-      user-select:none;
+      transform: translateZ(0);
+
+      pointer-events:none; /* важно: чтобы фото не мешало свайпу */
+      -webkit-user-drag: none;
+      user-drag: none;
     }
 
-    /* Bottom bar: caption + buttons */
+    /* Bottom bar: caption only (без кнопок) */
     .caption{
       position:absolute;
       left:14px; right:14px; bottom:12px;
 
-      background: rgba(0,0,0,.30);
+      background: rgba(0,0,0,.28);
       border:none !important;
       outline:none !important;
       box-shadow:none !important;
@@ -136,66 +135,29 @@
       -webkit-backdrop-filter: blur(10px);
 
       border-radius:14px;
-      padding:10px 12px;
+      padding:12px 14px;
       font-size:14px;
 
       display:flex;
-      gap:10px;
       align-items:center;
-      justify-content:space-between;
+      justify-content:flex-start;
       color: var(--txt);
 
       transform: translateZ(0);
       background-clip: padding-box;
     }
 
-    /* DEFAULT (desktop): single line ellipsis */
     #capText{
       color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
-      flex: 1;
-      padding-right: 10px;
-    }
-
-    .btns{ display:flex; gap:10px; flex-shrink:0 }
-
-    button{
-      border:0;
-      border-radius:12px;
-      padding:10px 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color:#eafff5;
-      font-weight:650;
-      cursor:pointer;
-      box-shadow: 0 10px 22px rgba(0,0,0,.35);
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    button:hover{
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-      box-shadow: 0 14px 28px rgba(0,0,0,.45);
-    }
-
-    button:active{ transform: translateY(1px) }
-
-    button.secondary{
-      background: rgba(255,255,255,0.06);
-      color: var(--accent-soft);
-      border:1px solid rgba(126,214,163,0.35);
-      box-shadow: none;
-    }
-
-    button.secondary:hover{
-      filter: brightness(1.12);
-      box-shadow: none;
-      transform:none;
+      /* чтобы на телефоне не обрезалось жестко — переносим на 2-3 строки */
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.25;
+      max-height: calc(1.25em * 3); /* максимум 3 строки */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
 
     .footer{
@@ -225,7 +187,20 @@
 
     .small{ opacity:.8; color: var(--muted); font-size:12px }
 
-    /* Floating hearts (bigger) */
+    button{
+      border:0;
+      border-radius:12px;
+      padding:12px 14px;
+      background: rgba(255,255,255,0.06);
+      color: var(--accent-soft);
+      border:1px solid rgba(126,214,163,0.35);
+      box-shadow: none;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
     .heart{
       position:absolute;
       width:28px;
@@ -245,95 +220,14 @@
       to   { transform: translateY(-110vh) translateZ(0); opacity:0 }
     }
 
-    /* ============================
-       iPhone / Mobile adaptation
-       ============================ */
-
-    /* make page usable inside iPhone safe areas */
-    @supports (padding: max(0px)) {
-      body{
-        padding-left: max(12px, env(safe-area-inset-left));
-        padding-right: max(12px, env(safe-area-inset-right));
-        padding-top: max(12px, env(safe-area-inset-top));
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
-      }
-    }
-
-    /* iPhone layout */
-    @media (max-width: 430px){
-      .card{
-        width: 100%;
-        padding:16px;
-        border-radius:20px;
-      }
-
-      h1{
-        font-size: 30px;
-        line-height: 1.05;
-      }
-
-      .sub{
-        font-size: 15px;
-        margin-bottom: 12px;
-      }
-
-      /* slider height: better on iPhone */
-      .slider{
-        height: min(62vh, 520px);
-        border-radius:18px;
-      }
-
-      /* caption becomes TWO-ROW layout:
-         1) full text (wraps)
-         2) buttons on the right */
-      .caption{
-        left:12px; right:12px; bottom:12px;
-        padding:10px 10px;
-        display:grid;
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto;
-        gap:8px 10px;
-        align-items:center;
-      }
-
-      /* Text becomes multi-line (NOT ellipsis) */
-      #capText{
-        grid-column: 1 / -1;
-        white-space: normal;
-        overflow: visible;
-        text-overflow: clip;
-        line-height: 1.25;
-        font-size: 14px;
-
-        /* if very long, clamp to 3 lines so it doesn't cover the photo */
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-      }
-
-      .btns{
-        grid-column: 2;
-        grid-row: 2;
-        gap:10px;
-      }
-
-      button{
-        padding:10px 12px;
-        border-radius:14px;
-        font-size: 15px;
-      }
-
-      .footer{
-        gap:10px;
-      }
-
-      .note{
-        min-width: 100%;
-      }
-
-      #musicBtn{
-        width: 100%;
-      }
+    /* iPhone: чтобы всё было плотнее */
+    @media (max-width: 480px){
+      .card{ width:94vw; padding:14px; border-radius:20px; }
+      .slider{ height: 56vh; border-radius:16px; }
+      .caption{ left:10px; right:10px; bottom:10px; padding:10px 12px; }
+      #capText{ font-size:14px; }
+      .note{ min-width: 100%; }
+      button{ width: 100%; padding:12px 14px; }
     }
   </style>
 </head>
@@ -341,15 +235,11 @@
 <body>
   <div class="card">
     <h1>С днём святого Валентина, любовь ❤️</h1>
-    <p class="sub">Нажимай “Дальше” или просто жми пробел 🙂</p>
+    <p class="sub">Свайп влево — дальше, свайп вправо — назад 🙂</p>
 
     <div class="slider" id="slider">
       <div class="caption">
         <div id="capText"></div>
-        <div class="btns">
-          <button class="secondary" id="prev">Назад</button>
-          <button id="next">Дальше</button>
-        </div>
       </div>
     </div>
 
@@ -358,7 +248,7 @@
         Я люблю тебя. Спасибо за нас. 💚
         <div class="small">P.S. Можно заменить этот текст на свой.</div>
       </div>
-      <button class="secondary" id="musicBtn">🎵 Вкл/выкл музыку</button>
+      <button id="musicBtn">🎵 Вкл/выкл музыку</button>
     </div>
   </div>
 
@@ -368,14 +258,14 @@
 
   <script>
     const slides = [
-      { src: "photos/8.jpg", cap: "Наша первая фотка", pos: "50% 35%", zoom: 1.15 },
-      { src: "photos/7.jpg", cap: "А тут я в тебя влюбился", pos: "50% 30%", zoom: 1.10 },
-      { src: "photos/6.jpg", cap: "Сдесь мы готовились праздновать наш первый новый год", pos: "55% 25%", zoom: 1.00 },
-      { src: "photos/5.jpg", cap: "Тут ты чумазая и очень милая", pos: "50% 40%", zoom: 1.20 },
-      { src: "photos/4.jpg", cap: "Здесь я тебе сказал что профессионал на коньках", pos: "50% 35%", zoom: 1.10 },
-      { src: "photos/3.jpg", cap: "А здесь мы типа крутые", pos: "50% 30%", zoom: 1.05 },
-      { src: "photos/2.jpg", cap: "Тут мы я чувствовал себя очень счастливым", pos: "50% 35%", zoom: 1.10 },
-      { src: "photos/1.jpg", cap: "А здесь мы злимся чутка друг на друга", pos: "50% 35%", zoom: 1.15 },
+      { src: "photos/8.jpg", cap: "Наша первая фотка" },
+      { src: "photos/7.jpg", cap: "А тут я в тебя влюбился" },
+      { src: "photos/6.jpg", cap: "Сдесь мы готовились праздновать наш первый новый год" },
+      { src: "photos/5.jpg", cap: "Тут ты чумазая и очень милая" },
+      { src: "photos/4.jpg", cap: "Здесь я тебе сказал что профессионал на коньках" },
+      { src: "photos/3.jpg", cap: "А здесь мы типа крутые" },
+      { src: "photos/2.jpg", cap: "Тут мы я чувствовал себя очень счастливым" },
+      { src: "photos/1.jpg", cap: "А здесь мы злимся чутка друг на друга" },
     ];
 
     const slider = document.getElementById("slider");
@@ -404,14 +294,46 @@
     }
     show(0);
 
-    document.getElementById("next").onclick = () => show(index + 1);
-    document.getElementById("prev").onclick = () => show(index - 1);
-
+    // Клавиатура (на компе)
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.code === "ArrowRight") show(index + 1);
       if (e.code === "ArrowLeft") show(index - 1);
     });
 
+    // ===== SWIPE (iPhone / Android) =====
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    const SWIPE_X_THRESHOLD = 45;   // сколько пикселей по X нужно пройти
+    const SWIPE_Y_BLOCK = 60;       // если сильно уехали по Y — считаем что это скролл
+
+    slider.addEventListener("touchstart", (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      tracking = true;
+    }, { passive: true });
+
+    slider.addEventListener("touchend", (e) => {
+      if (!tracking) return;
+      tracking = false;
+
+      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if (!t) return;
+
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      // если это больше похоже на вертикальный скролл — игнор
+      if (Math.abs(dy) > SWIPE_Y_BLOCK && Math.abs(dy) > Math.abs(dx)) return;
+
+      if (dx <= -SWIPE_X_THRESHOLD) show(index + 1); // свайп влево
+      else if (dx >= SWIPE_X_THRESHOLD) show(index - 1); // свайп вправо
+    }, { passive: true });
+
+    // Сердечки
     function spawnHeart(){
       const h = document.createElement("div");
       h.className = "heart";
@@ -428,6 +350,7 @@
     }
     setInterval(spawnHeart, 420);
 
+    // музыка
     const music = document.getElementById("music");
     const musicBtn = document.getElementById("musicBtn");
     musicBtn.onclick = async () => {
